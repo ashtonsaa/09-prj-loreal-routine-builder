@@ -40,10 +40,12 @@ body {
 .search-section {
   margin: 30px 0;
   display: flex;
+  gap: 12px; /* space between select and search */
 }
 
 .search-section select {
-  width: 100%;
+  flex: 1 1 auto;
+  min-width: 0; /* avoid overflow in constrained layouts */
   padding: 16px;
   font-size: 18px;
   border: 2px solid #000;
@@ -54,6 +56,21 @@ body {
 }
 
 .search-section select:focus {
+  outline: none;
+  border-color: #666;
+}
+
+/* compact search input */
+.search-input {
+  flex: 0 0 260px; /* fixed-ish width but shrinks if necessary */
+  padding: 12px 14px;
+  font-size: 16px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background: white;
+}
+
+.search-input:focus {
   outline: none;
   border-color: #666;
 }
@@ -79,6 +96,9 @@ body {
   overflow-y: auto;
   background: #fafafa;
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 /* placeholder message */
@@ -135,6 +155,71 @@ body {
   outline-offset: 2px;
 }
 
+/* Chat message styling for readability */
+/* assistant bubble */
+.chat-assistant {
+  background: #ffffff;
+  border: 1px solid #eee;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  color: #222;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+/* user bubble (right-aligned) */
+.chat-user {
+  display: inline-block;
+  background: #000;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin: 8px 0 12px;
+  align-self: flex-end;
+  max-width: 85%;
+  word-break: break-word;
+}
+
+/* assistant heading inside bubble */
+.chat-assistant .assistant-heading {
+  font-size: 15px;
+  margin: 0 0 8px;
+  font-weight: 700;
+  color: #111;
+}
+
+/* paragraphs and lists spacing */
+.chat-assistant p {
+  margin: 6px 0;
+  line-height: 1.45;
+  color: #333;
+  font-size: 15px;
+}
+
+.chat-assistant ol,
+.chat-assistant ul {
+  margin: 6px 0 6px 20px;
+  padding: 0;
+  color: #333;
+  font-size: 15px;
+}
+
+.chat-assistant li {
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+/* subtle emphasis for important notes */
+.chat-assistant strong {
+  font-weight: 700;
+}
+
+/* make links visible and clickable */
+.chat-assistant a {
+  color: #0b5cff;
+  text-decoration: underline;
+}
+
 /* visually hidden */
 .visually-hidden {
   position: absolute;
@@ -178,6 +263,7 @@ body {
   margin: 30px 0;
 }
 
+/* updated product-card rules to restore proper layout and overlay behavior */
 .product-card {
   flex: 0 1 calc(33.333% - 14px);
   border: 1px solid #ccc;
@@ -186,8 +272,21 @@ body {
   display: flex;
   gap: 15px;
   min-height: 160px;
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.12s;
+  position: relative; /* needed for overlay positioning */
+  align-items: center;
+  overflow: visible;
 }
 
+/* visually mark selected cards */
+.product-card.selected {
+  border-color: #000;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+}
+
+/* image + info remain the same */
 .product-card img {
   width: 110px;
   height: 110px;
@@ -203,14 +302,70 @@ body {
   min-height: 110px;
 }
 
-.product-card h3 {
-  font-size: 16px;
-  margin-bottom: 8px;
+/* info button in the card (keeps the description hidden until toggled) */
+.product-card .info-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #fff;
+  border: 1px solid #ccc;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  z-index: 12;
 }
 
-.product-card p {
-  font-size: 14px;
-  color: #666;
+.product-card .info-btn:hover {
+  background: #f5f5f5;
+  border-color: #999;
+}
+
+.product-card .info-btn:focus {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+/* product description as a centered overlay inside the card (hidden by default) */
+.product-card .product-desc {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(86%, 360px);
+  max-height: 60%;
+  overflow: auto;
+  display: none;
+  text-align: left;
+  font-size: 13px;
+  color: #444;
+  line-height: 1.35;
+  background: #fff;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+}
+
+/* show description when card is expanded */
+.product-card.expanded .product-desc {
+  display: block;
+}
+
+/* slightly dim underlying content when description is visible */
+.product-card.expanded::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 4px;
+  z-index: 5;
 }
 
 /* selected products */
@@ -226,10 +381,94 @@ body {
   margin-bottom: 20px;
 }
 
+/* Selected Products list badges */
 #selectedProductsList {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
+  /* limit height so the list doesn't push the Generate button down */
+  max-height: 120px;
+  overflow-y: auto;
+  padding-right: 4px; /* room for scrollbar */
+  align-items: flex-start;
+}
+
+/* individual selected item (more compact) */
+#selectedProductsList .selected-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  background: #fff;
+  margin: 4px 4px 0 0;
+  align-self: flex-start;
+  font-size: 13px;
+  line-height: 1;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+/* slightly stronger emphasis when hovering a badge */
+#selectedProductsList .selected-item:hover {
+  background: #fafafa;
+  border-color: #ccc;
+}
+
+/* smaller thumbnail */
+#selectedProductsList .selected-item img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+/* info area remains compact */
+#selectedProductsList .selected-item .selected-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+}
+
+/* product name tighter */
+#selectedProductsList .selected-item .selected-info strong {
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* remove button: larger hit area, friendly color, obvious on hover/focus */
+#selectedProductsList .selected-item .remove-btn {
+  margin-left: 6px;
+  background: transparent;
+  border: none;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #b22;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 6px;
+}
+
+#selectedProductsList .selected-item .remove-btn:hover {
+  background: rgba(178, 34, 34, 0.08);
+  color: #900;
+}
+
+#selectedProductsList .selected-item .remove-btn:focus {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+/* small placeholder styling inside the constrained list */
+#selectedProductsList .placeholder-message {
+  padding: 10px 4px;
+  color: #666;
+  font-size: 13px;
 }
 
 .generate-btn {
